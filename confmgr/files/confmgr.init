@@ -1,0 +1,17 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2012 Xavier Carcelle <xavier.carcelle@gmail.com>
+
+START=50
+STOP=50
+
+NAME=confmgr
+
+start() {
+	# generate cache
+	confmgr show
+}
+
+stop() {
+	# delete cache
+	rm -f /tmp/confmgr.cache
+}

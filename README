@@ -1,0 +1,10 @@
+This repository contains 3d party proprietary software under the form of
+OpenWrt packages makefiles for the Devolo dLAN USB Extender device.
+
+This software contains:
+
+- foot: the Qualcomm Atheros/Intellon 6300 device flashless boot utility
+        required for booting the Power Line Communication chip
+- confmgr: a simple configuration manager utility used by foot to fetch
+        and store simple key value pairs
+- hpav-firmware: the Qualcomm Atheros/Intellon 6300 firmware and PIB files

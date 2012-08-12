@@ -1,0 +1,58 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2012 Xavier Carcelle <xavier.carcelle@gmail.com>
+
+START=51
+STOP=51
+
+NAME=foot
+OPTS="-d -l"
+
+start_service() {
+	local section="$1"
+	local iface
+	local mt
+	local hpmac
+	local dak
+	local nmk
+	local ethmac
+	local psk
+
+	config_get iface $section interface
+	config_get mt $section media_type
+	config_get hpmac $section hpmac
+	config_get dak $section dak
+	config_get psk $section nmk
+
+	ethmac=$(cat /sys/class/net/$iface/address)
+
+	# produce a hash of the passphrase
+	nmk=$(hpav_cfg -p $psk -k)
+
+	# set these values in confmgr configuration for foot to use them
+	confmgr set MT $mt
+	confmgr set DAK $dak
+	confmgr set NMK $nmk
+	confmgr set ETHMAC $ethmac
+	confmgr set HPMAC $hpmac
+	confmgr set AVLNMembership 0
+	confmgr set UserString "Intellon Enabled Product"
+
+	service_start /usr/bin/$NAME $OPTS -m $ethmac \
+		-N /firmware/int6000-v4.4.0-02-NW6__-5-X-FINAL.nvm \
+		-P /tmp/local.pib \
+		-O /firmware/int6000-pib45-devolo-mt$mt.pib \
+		-p /tmp/remote.pib &
+}
+
+stop_service() {
+	killall -9 $NAME
+}
+
+start() {
+	config_load "foot"
+	config_foreach start_service "foot"
+}
+
+stop() {
+	service_stop /usr/bin/$NAME
+}

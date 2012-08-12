@@ -44,10 +44,6 @@ start_service() {
 		-p /tmp/remote.pib &
 }
 
-stop_service() {
-	killall -9 $NAME
-}
-
 start() {
 	config_load "foot"
 	config_foreach start_service "foot"

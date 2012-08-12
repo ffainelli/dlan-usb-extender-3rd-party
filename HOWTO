@@ -1,0 +1,250 @@
+OpenWrt and Devolo dLAN USB Extender building, flashing and
+configuration instructions.
+==============================================================================
+
+This document describes the various steps involved in building
+flashing and configuring an OpenWrt firmware for the Devolo
+dLAN USB Extender device. This device is using a Moschip MCS8140
+System-on-a-chip, which is only supported for the moment by the
+OpenWrt development version (called trunk later in this document).
+
+1) Building OpenWrt
+
+1.1) Prerequisites
+------------------
+
+In order to build OpenWrt, we recommend using a Linux-based machine with
+the usual GNU software development tools such as GCC, Make, ncurses etc..
+Use your Linux distribution package manager to install these tools. If
+there is any missing tool, OpenWrt will check for it and warn if it find
+it missing or ineadequate.
+
+To download the OpenWrt sources the subversion and git tools are required.
+
+Note: OpenWrt can also be built under FreeBSD or MacOSX, but their are not
+officially supported as build platforms.
+
+1.2) Checking out OpenWrt sources
+---------------------------------
+
+The OpenWrt sources are made available using subversion. Complete
+instructions can be found here: https://dev.openwrt.org/wiki/GetSource
+
+You should start defining a directory which will serve as the root directory
+for the OpenWrt sources and build system.
+
+OpenWrt does not require being built as root, and will actually prevent you
+from building it as root. Assuming you are in your home directory ($HOME),
+create a directory in which you will download OpenWrt sources:
+
+cd $HOME
+mkdir -p projects/openwrt
+cd project/openwrt
+
+We can now start downloading the OpenWrt sources in this current directory
+by doing the following:
+
+svn co svn://svn.openwrt.org/openwrt/trunk/
+
+The sources are now checked out, and are ready for building.
+
+1.3) Adding Third party software for PowerLine Communication
+------------------------------------------------------------
+
+Prior to building OpenWrt we need to download third-party software, which
+is responsible for making the Power Line Communication (PLC) part of the
+Devolo dLAN USB Extender device working.
+
+The Power Line Communication part of the dLAN USB Extender device requires
+some proprietary software which is made available using an OpenWrt "feed".
+
+A feed should be seen as a repository in which packages maintained by third
+parties can be added.
+
+Move to the previously downloaded OpenWrt sources at step 1.2) using the
+following:
+
+cd trunk/
+
+At the root of this directory, edit the file feeds.conf.default, which is
+going to contain the download method, name and url of the feed. Alternatively
+you can use the following:
+
+echo "src-git dlan https://github.com/ffainelli/dlan-usb-extender-3rd-party.git"
+>> feeds.conf.default
+
+The first column tells the feeds script how to download (using git), the second
+is a name to reference to this "feed" and the third one is the url where to find
+the package makefiles.
+
+Once this is done, we need to get a copy of this feed, in order to do so, use
+the
+following command:
+
+./scripts/feeds update dlan
+
+Now that we have got a copy of the feed, we can add the packages to the build
+system:
+
+./scripts/feeds install foot
+
+Since foot depends on confmgr and hpav-firmware to run, these packages are
+listed
+as dependencies and the feeds script handles that for us.
+
+foot also depends on another package called hpavcfg which is available in a
+different
+feed which is the default repository for OpenWrt packages. To install this
+package
+we need to proceed with the following:
+
+./scripts/feeds update packages
+./scripts/fees install hpavcfg
+
+The build system will have integrated these packages just like regular packages.
+
+1.4) Building OpenWrt
+---------------------
+
+Prior to building OpenWrt, we need to instruct the build system about which
+target we want to build for. In order to that, remain in the same directory
+($HOME/projects/openwrt/trunk) and run the following:
+
+make menuconfig
+
+You will be prompted with a console-based menu with which we will interact for
+configuring OpenWrt propertly.
+
+In the Target System menu, choose "Moschip MCS814x" and press enter. The OpenWrt
+build system has already preconfigured a certain number of base packages, but
+still we need to tell the build system to also include the Power Line
+Communication packages.
+
+In order to select the "foot" package, go to the "Utilities" section of the
+menu, then highlight the line "foot" and type "y". All dependencies are
+automatically taken care of.
+To select the "hpavcfg" package, now go to the "Network" section and type "y"
+as well.
+
+We are now ready to build the entire firmware image, to do so, just run:
+
+make
+
+The build usually takes some time (about 20 minutes on a relatively recent
+build machine) due to the building of the toolchain, packages and kernel.
+
+Once the build is done, we will have built the base firmware, which contains
+the Linux kernel, and all the selected packages.
+
+2) Flashing the device with an OpenWrt firmware
+-----------------------------------------------
+
+Now that we have successfully completed the OpenWrt build for the Devolo dLAN
+USB Extender device, we can prepare an USB flash stick to flash our device
+with this OpenWrt firmware.
+
+2.1) Locating and preparing the OpenWrt firmware image
+------------------------------------------------------
+
+Remain in the same directory ($HOME/projects/openwrt/trunk), once the build is
+finished you will find several files in the directory bin/mcs814x/ relative to
+this directory which correspond to various files useful for flashing the target.
+
+OpenWrt produces an image which can be used by the dLAN USB Extender firmware
+with the USB autoupdate feature. This image is:
+
+bin/mcs814x/openwrt-mcs814x-dlan-usb-extender-upgrade-squashfs.bin
+
+You will need to prepare an USB Stick with specific parameters in order to use
+the USB autoupdate feature of the dLAN USB Extender. The specific parameters of
+this USB stick are:
+
+an unique FAT32 partition with the label autoupdate. You should then copy the
+file bin/mcs814x/openwrt-mcs814x-dlan-usb-extender-upgrade-squashfs.bin to this
+USB stick with the name autoupdate_image. You can for instance use the
+following:
+
+cp bin/mcs814x/openwrt-mcs814x-dlan-usb-extender-upgrade-squashfs.bin
+/media/AUTOUPDATE/autoupdate_image
+
+2.2) Flashing the dLAN USB Extender
+-----------------------------------
+
+Your device is now ready to be flashed with this OpenWrt firmware, in order to
+let the autoupdate feature start, just plug in the USB key, and power cycle
+your device.
+
+The USB LED will start blinking fast indicating that it is reading the firmware
+file from the USB stick.
+
+3) Configuring your OpenWrt device
+----------------------------------
+
+By default the device will come up on the Power Line Communication network with
+the following parameters:
+
+IP address: 192.168.1.1
+Netmask: 255.255.255.0
+Homeplug AV NMK: HomePlugAV
+Telnet access with no password
+
+3.1) Configuring IP networking
+------------------------------
+
+For all OpenWrt devices IP networking is configured using the file
+/etc/config/network and contains the following:
+
+config interface lan
+        option ifname   eth0
+        option proto    static
+        option ipaddr   192.168.1.1
+        option netmask  255.255.255.0
+
+if you want to configure your device to instead obtain its IP address
+via DHCP, just replace the "static" protocol by "dhcp". You should then issue
+the following command for the settings to be applied:
+
+/etc/init.d/network restart
+
+
+3.2) Configuring Power Line Communication networking
+----------------------------------------------------
+
+Power Line Communication networking is configured through several means among
+them:
+
+- using the file /etc/config/foot
+- using the push button located at the back of the device
+- using the hpavcfg utility
+
+3.2.1) Using /etc/config/foot
+-----------------------------
+
+The file /etc/config/foot is responsible for configuring the PLC chip with
+initial parameters on startup, the most important parameters are DAK (Security
+ID) and NMK (network security key). Once the settings have been changed, you
+will need to powercycle the device for the PLC chip to fetch its new parameters
+
+3.2.2) Using the push button
+-----------------------------
+
+To associate your device with an existing Homeplug AV network, you should press
+another device push button, then press the push button on the device you want
+to to associate as well. Both Power LEDS will be blinking, and you should then
+see the PLC LEDs start blinking to indicate trafic is properly emitted and
+received by both (or more devices).
+
+3.2.3) Using the hpavcfg utility
+--------------------------------
+
+The hpavcfg utility is a ligthweight configuration utility which will only be
+able to send the device's NMK, if you wish to change a running device NMK you
+should proceed with the following:
+
+hpav_cfg -p <passphrase> -a <homeplug MAC address> [interface]
+
+where passphrase is the passphrase of your network, homeplug MAC address is the
+one configured in /etc/config/foot under the option hpmac, and [interface] is
+the network interface (eth0 unless explicitely modified).
+
+

@@ -8,3 +8,6 @@ This software contains:
 - confmgr: a simple configuration manager utility used by foot to fetch
         and store simple key value pairs
 - hpav-firmware: the Qualcomm Atheros/Intellon 6300 firmware and PIB files
+
+See the HOWTO file for more informations about how to build, flash and
+configure OpenWrt for the Devolo dLAN USB Extender.

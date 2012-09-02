@@ -39,7 +39,7 @@ create a directory in which you will download OpenWrt sources:
 
 cd $HOME
 mkdir -p projects/openwrt
-cd project/openwrt
+cd projects/openwrt
 
 We can now start downloading the OpenWrt sources in this current directory
 by doing the following:
@@ -99,7 +99,7 @@ package
 we need to proceed with the following:
 
 ./scripts/feeds update packages
-./scripts/fees install hpavcfg
+./scripts/feeds install hpavcfg
 
 The build system will have integrated these packages just like regular packages.
 
@@ -126,11 +126,13 @@ automatically taken care of.
 To select the "hpavcfg" package, now go to the "Network" section and type "y"
 as well.
 
+Exit and save the configuration.
+
 We are now ready to build the entire firmware image, to do so, just run:
 
 make
 
-The build usually takes some time (about 20 minutes on a relatively recent
+The build usually takes some time (up to one hour on a relatively recent
 build machine) due to the building of the toolchain, packages and kernel.
 
 Once the build is done, we will have built the base firmware, which contains
@@ -161,7 +163,7 @@ this USB stick are:
 
 an unique FAT32 partition with the label autoupdate. You should then copy the
 file bin/mcs814x/openwrt-mcs814x-dlan-usb-extender-upgrade-squashfs.bin to this
-USB stick with the name autoupdate_image. You can for instance use the
+USB stick and name the file autoupdate_image. You can for instance use the
 following:
 
 cp bin/mcs814x/openwrt-mcs814x-dlan-usb-extender-upgrade-squashfs.bin
@@ -185,7 +187,7 @@ the following parameters:
 
 IP address: 192.168.1.1
 Netmask: 255.255.255.0
-Homeplug AV NMK: HomePlugAV
+Homeplug AV NPW: HomePlugAV
 Telnet access with no password
 
 3.1) Configuring IP networking
@@ -221,9 +223,10 @@ them:
 -----------------------------
 
 The file /etc/config/foot is responsible for configuring the PLC chip with
-initial parameters on startup, the most important parameters are DAK (Security
-ID) and NMK (network security key). Once the settings have been changed, you
-will need to powercycle the device for the PLC chip to fetch its new parameters
+initial parameters on startup, the most important parameters are DPW (Security
+ID) or device password) and NPW (network password). Once the settings have been
+changed, you will need to powercycle the device for the PLC chip to fetch its
+new parameters
 
 3.2.2) Using the push button
 -----------------------------
@@ -238,8 +241,8 @@ received by both (or more devices).
 --------------------------------
 
 The hpavcfg utility is a ligthweight configuration utility which will only be
-able to send the device's NMK, if you wish to change a running device NMK you
-should proceed with the following:
+able to send the device's NPW (Network password), if you wish to change a running
+device NPW you should proceed with the following:
 
 hpav_cfg -p <passphrase> -a <homeplug MAC address> [interface]
 

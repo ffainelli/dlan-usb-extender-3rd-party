@@ -185,6 +185,7 @@ file from the USB stick.
 By default the device will come up on the Power Line Communication network with
 the following parameters:
 
+Ethernet MAC address: 00:0B:3B:00:00:01
 IP address: 192.168.1.1
 Netmask: 255.255.255.0
 Homeplug AV NPW: HomePlugAV
@@ -201,8 +202,12 @@ config interface lan
         option proto    static
         option ipaddr   192.168.1.1
         option netmask  255.255.255.0
+	option macaddr	00:0B:3B:00:00:01
 
-if you want to configure your device to instead obtain its IP address
+The Ethernet MAC address of the interface can be changed at any time by using
+the configuration option "macaddr" as shown below.
+
+If you want to configure your device to instead obtain its IP address
 via DHCP, just replace the "static" protocol by "dhcp". You should then issue
 the following command for the settings to be applied:
 

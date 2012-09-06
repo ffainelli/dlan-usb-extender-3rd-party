@@ -42,6 +42,11 @@ start_service() {
 		-P /tmp/local.pib \
 		-O /firmware/int6000-pib45-devolo-mt$mt.pib \
 		-p /tmp/remote.pib &
+
+	# start hpav_cfg with the specified NPW
+	# if the INT6300 MAC was already started, the NPW will be set
+	# again correctly
+	hpav_cfg -p $psk -a $hpmac $iface
 }
 
 start() {

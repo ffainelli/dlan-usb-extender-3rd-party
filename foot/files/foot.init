@@ -37,7 +37,7 @@ start_service() {
 	confmgr set AVLNMembership 0
 	confmgr set UserString "Intellon Enabled Product"
 
-	service_start /usr/bin/$NAME $OPTS -m $ethmac \
+	/usr/bin/$NAME $OPTS -m $ethmac \
 		-N /firmware/int6000-v4.4.0-02-NW6__-5-X-FINAL.nvm \
 		-P /tmp/local.pib \
 		-O /firmware/int6000-pib45-devolo-mt$mt.pib \
@@ -50,5 +50,5 @@ start() {
 }
 
 stop() {
-	service_stop /usr/bin/$NAME
+	killall -9 $NAME
 }

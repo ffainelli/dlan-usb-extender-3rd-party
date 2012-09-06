@@ -205,7 +205,7 @@ config interface lan
 	option macaddr	00:0B:3B:00:00:01
 
 The Ethernet MAC address of the interface can be changed at any time by using
-the configuration option "macaddr" as shown below.
+the configuration option "macaddr" as show above.
 
 If you want to configure your device to instead obtain its IP address
 via DHCP, just replace the "static" protocol by "dhcp". You should then issue

@@ -15,23 +15,23 @@ start_service() {
 	local dpw
 	local npw
 	local ethmac
-	local psk
+	local nmk
 
 	config_get iface $section interface
 	config_get mt $section media_type
 	config_get hpmac $section hpmac
 	config_get dpw $section dpw
-	config_get psk $section npw
+	config_get npw $section npw
 
 	ethmac=$(cat /sys/class/net/$iface/address)
 
 	# produce a hash of the passphrase
-	npw=$(hpav_cfg -p $psk -k)
+	nmk=$(hpav_cfg -p $npw -k)
 
 	# set these values in confmgr configuration for foot to use them
 	confmgr set MT $mt
 	confmgr set DAK $dpw
-	confmgr set NMK $npw
+	confmgr set NMK $nmk
 	confmgr set ETHMAC $ethmac
 	confmgr set HPMAC $hpmac
 	confmgr set AVLNMembership 0
@@ -46,7 +46,7 @@ start_service() {
 	# start hpav_cfg with the specified NPW
 	# if the INT6300 MAC was already started, the NPW will be set
 	# again correctly
-	hpav_cfg -p $psk -a $hpmac $iface
+	hpav_cfg -p $npw -a $hpmac $iface
 }
 
 start() {

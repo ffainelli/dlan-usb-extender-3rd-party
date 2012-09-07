@@ -16,6 +16,7 @@ start_service() {
 	local npw
 	local ethmac
 	local nmk
+	local dak
 
 	config_get iface $section interface
 	config_get mt $section media_type
@@ -25,12 +26,13 @@ start_service() {
 
 	ethmac=$(cat /sys/class/net/$iface/address)
 
-	# produce a hash of the passphrase
+	# produce a hash of the NPW and DPW
 	nmk=$(hpav_cfg -p $npw -k)
+	dak=$(hpav_cfg -d -p $dpw -k)
 
 	# set these values in confmgr configuration for foot to use them
 	confmgr set MT $mt
-	confmgr set DAK $dpw
+	confmgr set DAK $dak
 	confmgr set NMK $nmk
 	confmgr set ETHMAC $ethmac
 	confmgr set HPMAC $hpmac

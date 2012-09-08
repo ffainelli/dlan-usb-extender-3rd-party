@@ -117,12 +117,12 @@ configuring OpenWrt propertly.
 
 In the Target System menu, choose "Moschip MCS814x" and press enter. The OpenWrt
 build system has already preconfigured a certain number of base packages, but
-still we need to tell the build system to also include the Power Line
-Communication packages.
+still we need to tell the build system to also include the dLAN USB Extender
+specific package set.
 
-In order to select the "foot" package, go to the "Utilities" section of the
-menu, then highlight the line "foot" and type "y". All dependencies are
-automatically taken care of.
+In order to do that, go to the "Target Profile" menu, and switch from "Generic"
+to "Devolo dLAN USB Extender", this will now select the "foot" package which is
+required for proper Power Line Communication operation.
 To select the "hpavcfg" package, now go to the "Network" section and type "y"
 as well.
 

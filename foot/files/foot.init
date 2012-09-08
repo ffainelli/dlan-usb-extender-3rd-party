@@ -5,6 +5,7 @@ START=51
 STOP=51
 
 NAME=foot
+STATUS_FILE="/tmp/$NAME.status"
 OPTS="-d -l"
 
 start_service() {
@@ -48,7 +49,24 @@ start_service() {
 	# start hpav_cfg with the specified NPW
 	# if the INT6300 MAC was already started, the NPW will be set
 	# again correctly
-	hpav_cfg -p $npw -a $hpmac $iface
+	hpav_cfg -p $npw $iface
+	ret=$?
+	if [ $ret -eq 0 ]; then
+		echo "Warm reconfiguration successful!"
+		exit 0
+	fi
+
+	# otherwise, just wait for foot to start properly and set again
+	# the NPW in case of cold boot
+	while true; do
+		local status="$(cat $STATUS_FILE)"
+		if [ "$status" = "MacStarted" ]; then
+			echo "Cold reconfiguration successful!"
+			hpav_cfg -p $npw $iface
+			break
+		fi
+		sleep 1
+	done
 }
 
 start() {

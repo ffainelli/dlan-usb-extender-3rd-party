@@ -63,7 +63,10 @@ start_service() {
 		if [ "$status" = "MacStarted" ]; then
 			echo "Cold reconfiguration successful!"
 			hpav_cfg -p $npw $iface
-			break
+			ret=$?
+			if [ $ret -eq 0 ]; then
+				break
+			fi
 		fi
 		sleep 1
 	done

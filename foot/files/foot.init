@@ -55,21 +55,6 @@ start_service() {
 		echo "Warm reconfiguration successful!"
 		exit 0
 	fi
-
-	# otherwise, just wait for foot to start properly and set again
-	# the NPW in case of cold boot
-	while true; do
-		local status="$(cat $STATUS_FILE)"
-		if [ "$status" = "MacStarted" ]; then
-			echo "Cold reconfiguration successful!"
-			hpav_cfg -p $npw $iface
-			ret=$?
-			if [ $ret -eq 0 ]; then
-				break
-			fi
-		fi
-		sleep 1
-	done
 }
 
 start() {

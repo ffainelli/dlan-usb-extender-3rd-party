@@ -7,14 +7,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=foot
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 include $(INCLUDE_DIR)/package.mk
 
 define Package/foot
   SECTION:=utils
   CATEGORY:=Utilities
-  DEPENDS:=@TARGET_mcs814x +hpav-firmware +libstdcpp +confmgr
+  DEPENDS:=@TARGET_mcs814x +hpav-firmware +libstdcpp +confmgr +hpavcfg
   TITLE:=INT6x00 Flashless boot Utility (foot)
   MAINTAINER:=Florian Fainelli <florian@openwrt.org>
 endef

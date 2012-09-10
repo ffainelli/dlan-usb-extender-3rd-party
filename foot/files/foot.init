@@ -5,7 +5,6 @@ START=51
 STOP=51
 
 NAME=foot
-STATUS_FILE="/tmp/$NAME.status"
 OPTS="-d -l"
 
 start_service() {
@@ -28,28 +27,38 @@ start_service() {
 	ethmac=$(cat /sys/class/net/$iface/address)
 
 	# produce a hash of the NPW and DPW
-	nmk=$(hpav_cfg -p $npw -k)
-	dak=$(hpav_cfg -d -p $dpw -k)
+	nmk=$(hpav_cfg -n $npw -k)
+	dak=$(hpav_cfg -d $dpw -k)
 
-	# set these values in confmgr configuration for foot to use them
+	# we need to handle two cases
+	# 1) no existing configuration (first boot)
+	if [ ! -f /firmware/local.pib ]; then
+		# create initial configuration
+		confmgr set NMK $nmk
+		confmgr set AVLNMembership 0
+		confmgr set UserString "Intellon Enabled Product"
+	fi
+
+	# 2) there is an existing configuration with possibly
+	# modified NMK (due to push-button or setting with DAK)
+	# and possibly modified hpmac, ethmac, dpw
 	confmgr set MT $mt
 	confmgr set DAK $dak
-	confmgr set NMK $nmk
 	confmgr set ETHMAC $ethmac
 	confmgr set HPMAC $hpmac
-	confmgr set AVLNMembership 0
-	confmgr set UserString "Intellon Enabled Product"
 
+	# start foot with the given parameters and a non-volatile
+	# local pib path to save it
 	/usr/bin/$NAME $OPTS -m $ethmac \
 		-N /firmware/int6000-v4.4.0-02-NW6__-5-X-FINAL.nvm \
-		-P /tmp/local.pib \
+		-P /firmware/local.pib \
 		-O /firmware/int6000-pib45-devolo-mt$mt.pib \
 		-p /tmp/remote.pib &
 
-	# start hpav_cfg with the specified NPW
-	# if the INT6300 MAC was already started, the NPW will be set
-	# again correctly
-	hpav_cfg -p $npw $iface
+	# reset the INT6300 MAC, if it is started, it will
+	# reboot and be loaded with the updated PIB, if not, the command
+	# will just fail and foot will continue booting the INT6300
+	hpav_cfg -r $iface
 	ret=$?
 	if [ $ret -eq 0 ]; then
 		echo "Warm reconfiguration successful!"

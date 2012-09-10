@@ -8,6 +8,7 @@
 action=${1:-help}
 shift 1
 
+PERSIST_CACHE=/firmware/confmgr.cache
 CONF_CACHE=/tmp/confmgr.cache
 
 touch $CONF_CACHE
@@ -64,7 +65,28 @@ do_get() {
 	return 0
 }
 
+#
+# $1: source file
+# $2: temporary file before rename
+# $3: final file destination
+do_fetch_store() {
+	local src=$1
+	local tmp_dst=$2
+	local final_dst=$3
+
+	cp $src $tmp_dst
+	fsync $tmp_dst
+	# use a rename to provide an atomic operation
+	mv $tmp_dst $final_dst
+}
+
 do_store() {
+	do_fetch_store "$CONF_CACHE" "$CONF_CACHE.persist" "$PERSIST_CACHE"
+	return 0
+}
+
+do_fetch() {
+	do_fetch_store "$PERSIST_CACHE" "$CONF_CACHE.persist" "$CONF_CACHE"
 	return 0
 }
 
@@ -93,6 +115,7 @@ do_help() {
 Available commands:
 	set <key1> <value1> .. <keyN> <valueN>
 	get <key>
+	fetch
 	store
 	delete <key1> .. <keyN>
 	show
@@ -100,6 +123,6 @@ EOF
 	exit 1
 }
 
-ALL_COMMANDS="get set store delete show help"
+ALL_COMMANDS="get set fetch store delete show help"
 list_contains ALL_COMMANDS "$action" || action="help"
 do_$action "$@"

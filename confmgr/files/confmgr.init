@@ -7,8 +7,12 @@ STOP=50
 NAME=confmgr
 
 start() {
-	# generate cache
-	confmgr show
+	# import cache
+	touch /tmp/confmgr.cache
+
+	if [ -s /firmware/confmgr.cache ]; then
+		confmgr fetch
+	fi
 }
 
 stop() {

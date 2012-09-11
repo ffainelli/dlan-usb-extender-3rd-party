@@ -13,7 +13,6 @@ start_service() {
 	local mt
 	local hpmac
 	local dpw
-	local npw
 	local ethmac
 	local nmk
 	local dak
@@ -22,12 +21,11 @@ start_service() {
 	config_get mt $section media_type
 	config_get hpmac $section hpmac
 	config_get dpw $section dpw
-	config_get npw $section npw
 
 	ethmac=$(cat /sys/class/net/$iface/address)
 
 	# produce a hash of the NPW and DPW
-	nmk=$(hpav_cfg -n $npw -k)
+	nmk=$(hpav_cfg -n HomePlugAV -k)
 	dak=$(hpav_cfg -d $dpw -k)
 
 	# we need to handle two cases

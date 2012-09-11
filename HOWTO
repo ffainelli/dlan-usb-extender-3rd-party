@@ -230,31 +230,41 @@ them:
 -----------------------------
 
 The file /etc/config/foot is responsible for configuring the PLC chip with
-initial parameters on startup, the most important parameters are DPW (Security
-ID) or device password) and NPW (network password). Once the settings have been
+initial parameters on startup, the most important parameters is the DPW
+(Security ID or device password). Once the settings have been
 changed, you will need to powercycle the device for the PLC chip to fetch its
-new parameters
+new parameters, this can be done using the following command:
+
+/etc/init.d/foot restart
 
 3.2.2) Using the push button
 -----------------------------
 
 To associate your device with an existing Homeplug AV network, you should press
 another device push button, then press the push button on the device you want
-to to associate as well. Both Power LEDS will be blinking, and you should then
+to associate as well. Both Power LEDS will be blinking, and you should then
 see the PLC LEDs start blinking to indicate trafic is properly emitted and
-received by both (or more devices).
+received by devices.
 
 3.2.3) Using the hpavcfg utility
 --------------------------------
 
-The hpavcfg utility is a ligthweight configuration utility which will only be
-able to send the device's NPW (Network password), if you wish to change a running
-device NPW you should proceed with the following:
+The hpavcfg utility is a ligthweight configuration utility which is able to send
+a NPW to either a local or remote device. To change a device's NPW, you should
+issue the following command:
 
-hpav_cfg -p <passphrase> -a <homeplug MAC address> [interface]
+hpav_cfg -n <network passphrase> <network interface>
 
-where passphrase is the passphrase of your network, homeplug MAC address is the
-one configured in /etc/config/foot under the option hpmac, and [interface] is
-the network interface (eth0 unless explicitely modified).
+by default, hpav_cfg will use the HomePlugAV broadcast MAC address for sending
+this command. If you want to target a single device, use the "-a" switch of
+the utility.
+
+if you wish to remotely change the network password of a device, you can do the
+following:
+
+hpav_cfg -d <device passphrase> -n <network passphrase> <network interface>
+
+where <device passphrase> is the device security key usually printed on a
+sticker at the back of the device.
 
 

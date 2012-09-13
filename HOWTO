@@ -257,14 +257,6 @@ hpav_cfg -n <network passphrase> <network interface>
 
 by default, hpav_cfg will use the HomePlugAV broadcast MAC address for sending
 this command. If you want to target a single device, use the "-a" switch of
-the utility.
+the utility, as show below:
 
-if you wish to remotely change the network password of a device, you can do the
-following:
-
-hpav_cfg -d <device passphrase> -n <network passphrase> <network interface>
-
-where <device passphrase> is the device security key usually printed on a
-sticker at the back of the device.
-
-
+hpav_cfg -n <network passphrase> -a 00:11:22:33:44:55 <network interface>

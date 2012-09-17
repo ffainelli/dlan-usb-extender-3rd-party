@@ -1,0 +1,20 @@
+#!/bin/sh
+
+start_wmbus() {
+	local cfg="$1"
+	local tty="$2"
+	local mode
+
+	config_get mode "$cfg" mode
+
+	wmbus-repeater -d /dev/$tty $mode
+}
+
+case "$DEVICENAME" in
+	tty*)
+		[ -e "/dev/$DEVICENAME" ] || [ "$ACTION" = remove ] || killall wmbus-repeater
+		config_load wmbus
+		config_foreach start_wmbus wmbus "/dev/$DEVICENAME"
+	;;
+esac
+

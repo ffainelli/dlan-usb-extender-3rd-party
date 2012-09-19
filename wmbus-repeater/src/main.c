@@ -147,7 +147,7 @@ int main(int argc, char **argv)
 
 	if(1 != argc)
 	{
-		usage(appname);
+		return usage(appname);
 	}
 
 	if(-1 == amber_open(device, mode))

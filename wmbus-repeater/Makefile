@@ -5,7 +5,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=wmbus-repeater
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -38,6 +38,8 @@ endef
 define Package/wmbus-repeater/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DATA) ./files/wmbus-repeater.config $(1)/etc/config/wmbus-repeater
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) ./files/wmbus-repeater.init $(1)/etc/init.d/wmbus-repeater
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/tty
 	$(INSTALL_DATA) ./files/wmbus-repeater.hotplug $(1)/etc/hotplug.d/tty/30-wmbus-repeater
 	$(INSTALL_DIR) $(1)/usr/bin

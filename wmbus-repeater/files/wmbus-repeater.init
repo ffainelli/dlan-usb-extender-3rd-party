@@ -1,0 +1,23 @@
+#!/bin/sh /etc/rc.common
+
+NAME=wmbus-repeater
+
+start_service() {
+	local section="$1"
+	local mode
+	local device
+
+	config_get mode $section mode
+	config_get device $section device
+
+	$NAME -d $device $mode &
+}
+
+start() {
+	config_load "$NAME"
+	config_foreach start_service "$NAME"
+}
+
+stop() {
+	killall -9 $NAME
+}

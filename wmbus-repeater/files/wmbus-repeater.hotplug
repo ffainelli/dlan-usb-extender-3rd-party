@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /lib/functions.sh
+
 start_wmbus() {
 	local cfg="$1"
 	local tty="$2"
@@ -7,14 +9,21 @@ start_wmbus() {
 
 	config_get mode "$cfg" mode
 
-	wmbus-repeater -d /dev/$tty $mode
+	wmbus-repeater -d $tty $mode &
 }
 
 case "$DEVICENAME" in
-	tty*)
-		[ -e "/dev/$DEVICENAME" ] || [ "$ACTION" = remove ] || killall wmbus-repeater
-		config_load wmbus
-		config_foreach start_wmbus wmbus "/dev/$DEVICENAME"
+	ttyUSB*)
+		case "$ACTION" in
+			remove*)
+				killall -9 wmbus-repeater 2>&1 > /dev/null
+				;;
+			add*)
+				config_load wmbus-repeater
+				config_foreach start_wmbus wmbus-repeater "/dev/$DEVICENAME"
+				;;
+			*)
+				;;
+		esac
 	;;
 esac
-

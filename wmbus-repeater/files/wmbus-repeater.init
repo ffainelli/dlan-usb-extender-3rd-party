@@ -6,11 +6,13 @@ start_service() {
 	local section="$1"
 	local mode
 	local device
+	local iface
 
 	config_get mode $section mode
 	config_get device $section device
+	config_get iface $section interface
 
-	$NAME -d $device $mode &
+	$NAME -d $device -i $iface $mode &
 }
 
 start() {

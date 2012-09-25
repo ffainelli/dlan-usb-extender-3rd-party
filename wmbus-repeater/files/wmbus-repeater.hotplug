@@ -6,10 +6,12 @@ start_wmbus() {
 	local cfg="$1"
 	local tty="$2"
 	local mode
+	local iface
 
 	config_get mode "$cfg" mode
+	config_get iface "$cfg" interface
 
-	wmbus-repeater -d $tty $mode &
+	wmbus-repeater -d $tty -i $iface $mode &
 }
 
 case "$DEVICENAME" in

@@ -27,23 +27,62 @@
 
 #include "network.h"
 
-#define INTERFACE "br0"
-#define BROADCAST_ADDRESS "169.254.255.255"
 #define PORT 22208
 
 static int cfg_socket = -1;
 static struct sockaddr_in addr, bindaddr, localaddr;
 
-static void get_local_address(struct in_addr *in)
+static int get_local_address(struct in_addr *in, const char *interface)
 {
 	struct ifreq ifr;
-	strcpy(ifr.ifr_name, INTERFACE);
-	ioctl(cfg_socket, SIOCGIFADDR, &ifr);
+	int ret;
+
+	strcpy(ifr.ifr_name, interface);
+	ret = ioctl(cfg_socket, SIOCGIFADDR, &ifr);
+	if (ret < 0)
+	{
+		printf("ERROR: unable to get interface.\n");
+		return -1;
+	}
 	memcpy(in, &((struct sockaddr_in *) (&ifr.ifr_addr))->sin_addr, sizeof(((struct sockaddr_in *) (&ifr.ifr_addr))->sin_addr));
+
+	return 0;
 }
 
-int netw_open()
+static int get_broadcast_address(struct in_addr *in, const char *interface)
 {
+	struct ifreq ifr;
+	int ret;
+
+	strcpy(ifr.ifr_name, interface);
+	ret = ioctl(cfg_socket, SIOCGIFBRDADDR, &ifr);
+	if (ret < 0)
+	{
+		printf("ERROR: unable to get broadcast address.\n");
+		return -1;
+	}
+
+	if (ifr.ifr_broadaddr.sa_family != AF_INET)
+	{
+		printf("ERROR: unsupported address family.\n");
+		return -1;
+	}
+
+	memcpy(in, &((struct sockaddr_in *) (&ifr.ifr_broadaddr))->sin_addr, sizeof(((struct sockaddr_in *) (&ifr.ifr_broadaddr))->sin_addr));
+
+	return 0;
+}
+
+int netw_open(const char *interface)
+{
+	int ret = 0;
+
+	if (!interface)
+	{
+		printf("ERROR: No interface specified\n");
+		return -1;
+	}
+
 	if(-1 != cfg_socket)
 	{
 		printf("ERROR: Network already initialized.\n");
@@ -58,7 +97,10 @@ int netw_open()
 		return -1;
 	}
 
-	get_local_address(&(localaddr.sin_addr));
+	ret = get_local_address(&(localaddr.sin_addr), interface);
+	if (ret)
+		return ret;
+
 	printf("netw_open: local address %s\n", inet_ntoa(localaddr.sin_addr));
 
 	memset(&bindaddr, 0, sizeof(bindaddr));
@@ -77,9 +119,14 @@ int netw_open()
 	setsockopt(cfg_socket, SOL_SOCKET, SO_BROADCAST, &optval, sizeof(optval));
 
 	memset(&addr, 0, sizeof(addr));
-	inet_aton(BROADCAST_ADDRESS, &addr.sin_addr);
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(PORT);
+
+	ret = get_broadcast_address(&(addr.sin_addr), interface);
+	if (ret)
+		return ret;
+
+	printf("netw_open: broadcast address %s\n", inet_ntoa(addr.sin_addr));
 
 	return 0;
 }

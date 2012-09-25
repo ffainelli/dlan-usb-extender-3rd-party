@@ -124,12 +124,16 @@ int main(int argc, char **argv)
 	int opt;
 	const char *appname = strdup(argv[0]);
 	const char *device = NULL;
+	const char *interface = NULL;
 	const char *mode = NULL;
 
-	while ((opt = getopt(argc, argv, "d:h")) > 0) {
+	while ((opt = getopt(argc, argv, "d:i:h")) > 0) {
 		switch (opt) {
 		case 'd':
 			device = optarg;
+			break;
+		case 'i':
+			interface = optarg;
 			break;
 		case 'h':
 		default:
@@ -153,7 +157,7 @@ int main(int argc, char **argv)
 	if(-1 == amber_open(device, mode))
 		return -1;
 
-	if(-1 == netw_open())
+	if(-1 == netw_open(interface))
 	{
 		amber_close();
 		return -1;
@@ -182,6 +186,12 @@ int main(int argc, char **argv)
 
 		printf("(%s) select is sleeping for %ld secs\n", get_timestamp(), time_delay);
 		int rc = select(nfd, &rfds, NULL, NULL, (timeout.tv_sec ? &timeout : NULL) );
+
+		if (nfd < 0)
+		{
+			printf("ERROR: device disconnected\n");
+			goto out;
+		}
 
 		if(-1 == rc)
 		{
@@ -309,7 +319,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-
+out:
 	netw_close();
 	amber_close();
 

@@ -34,6 +34,7 @@ int amber_write(unsigned char *buf, int buflen);
 int amber_write_command(unsigned char *buf, int buflen);
 int amber_read(unsigned char *buf, int maxbuflen);
 int amber_get_fd();
+int amber_fd_is_valid();
 
 #endif
 

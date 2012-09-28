@@ -161,3 +161,9 @@ int amber_get_fd()
 	return cfg_fd;
 }
 
+int amber_fd_is_valid(const char *device)
+{
+	struct stat buf;
+
+	return stat(device, &buf);
+}

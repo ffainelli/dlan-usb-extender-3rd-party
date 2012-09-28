@@ -187,7 +187,7 @@ int main(int argc, char **argv)
 		printf("(%s) select is sleeping for %ld secs\n", get_timestamp(), time_delay);
 		int rc = select(nfd, &rfds, NULL, NULL, (timeout.tv_sec ? &timeout : NULL) );
 
-		if (nfd < 0)
+		if (amber_fd_is_valid(device) < 0)
 		{
 			printf("ERROR: device disconnected\n");
 			goto out;

@@ -260,3 +260,53 @@ this command. If you want to target a single device, use the "-a" switch of
 the utility, as show below:
 
 hpav_cfg -n <network passphrase> -a 00:11:22:33:44:55 <network interface>
+
+4) Using wmbus-repeater with the dLAN USB Extender
+--------------------------------------------------
+
+wmbus-repeater is a software package which is connected to an Amber Wireless
+USB stick and on the other side, to the HomePlug AV network.
+
+Its purpose is to repeat wireless data received on the USB stick back to the
+network, or the opposite depending on the network topology and goals.
+
+The typical setup is described below:
+
+METER (eva board)   R1                     R2                    MUC (PC)
+------------------------------------------------------------------------
+T1meter     ->      T2other     ->         T1meter      ->       T2other
+
+4.1) Configuring wmbus-repeater
+-------------------------------
+
+The configuration of the wmbus-repeater software is done in
+/etc/config/wmbus-repeater. The default configuration is the following:
+
+config wmbus-repeater
+	option device "/dev/ttyUSB0"
+	option interface "eth0"
+	option mode "S1
+
+Mode can be:
+- S1
+- S2
+- T1meter
+- T1other
+- T2meter
+- T2other
+
+Depending on your setup and Wireless and HomePlug AV network topology, you will
+have to configure the wmbus-repeater daemon to be in one of the mode presented
+above.
+
+4.2) Starting/stopping and USB stick hot-plugging
+-------------------------------------------------
+
+By default, when a USB stick is hotplugged on a dLAN USB Extender device the
+wmbus-repeater software will be started on the corresponding /dev/ttyUSB<N>
+device with the mode specified in the configuration file
+/etc/config/wmbus-repeater. You can still control the execution life of
+wmbus-repeater by issuing the following commands:
+
+/etc/init.d/wmbus-repeater stop
+/etc/init.d/wmbus-repeater start

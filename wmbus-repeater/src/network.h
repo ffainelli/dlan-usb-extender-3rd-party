@@ -17,10 +17,10 @@
 #define _NETWORK_H
 
 int netw_open(const char *interface);
-int netw_close();
+int netw_close(void);
 int netw_send(unsigned char *data, int datalen);
 int netw_receive(unsigned char *buf, int maxbuflen);
-int netw_get_fd();
+int netw_get_fd(void);
 
 #endif
 

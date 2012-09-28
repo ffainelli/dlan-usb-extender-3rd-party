@@ -38,7 +38,7 @@ static int repeat_directly = 0;
 static time_t time_delay = 0;
 static unsigned char access_nr = 0;
 
-unsigned char get_random_number()
+static unsigned char get_random_number(void)
 {
 	unsigned char rv = 0;
 	int fd = open("/dev/urandom", O_RDONLY | O_NONBLOCK);
@@ -51,7 +51,7 @@ unsigned char get_random_number()
 	return rv;
 }
 
-char *get_timestamp(void)
+static char *get_timestamp(void)
 {
 	static char t[9];
 	time_t clock;
@@ -61,7 +61,8 @@ char *get_timestamp(void)
 	return t;
 }
 
-void hex_dump(unsigned char *buf, int len)
+#ifdef DEBUG
+static void hex_dump(unsigned char *buf, int len)
 {
 	int i;
 	for(i=0;i<len;i++)
@@ -69,8 +70,9 @@ void hex_dump(unsigned char *buf, int len)
 
 	printf("\n");
 }
+#endif
 
-time_t send_timed_buffers(void)
+static time_t send_timed_buffers(void)
 {
 	static time_t last_time = 0;
 	time_t current_time;

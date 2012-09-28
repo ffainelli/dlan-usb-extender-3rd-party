@@ -29,12 +29,12 @@ typedef enum
 } tWMBUS_MODE;
 
 int amber_open(const char *devname, const char *mode);
-int amber_close();
+int amber_close(void);
 int amber_write(unsigned char *buf, int buflen);
 int amber_write_command(unsigned char *buf, int buflen);
 int amber_read(unsigned char *buf, int maxbuflen);
-int amber_get_fd();
-int amber_fd_is_valid();
+int amber_get_fd(void);
+int amber_fd_is_valid(const char *device);
 
 #endif
 

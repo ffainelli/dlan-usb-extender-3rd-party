@@ -131,7 +131,7 @@ int netw_open(const char *interface)
 	return 0;
 }
 
-int netw_close()
+int netw_close(void)
 {
 	if(-1 != cfg_socket)
 	{
@@ -173,7 +173,7 @@ int netw_receive(unsigned char *buf, int maxbuflen)
 	return r;
 }
 
-int netw_get_fd()
+int netw_get_fd(void)
 {
 	return cfg_socket;
 }

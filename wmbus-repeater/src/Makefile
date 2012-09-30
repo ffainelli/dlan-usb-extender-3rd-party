@@ -1,9 +1,8 @@
 CC=gcc
 RM=rm
-CFLAGS+=-I. -I$(KERNEL_SRC)/include 
+CFLAGS+=-I.
 LFLAGS+=
-DEPS=
-#CXXFLAGS+= -I. -I$(KERNEL_SRC)/include
+DEPS=$(wildcard *.h)
 
 .PHONY: all clean
 
@@ -11,9 +10,6 @@ all: wmbus-repeater
 
 %.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) -Wall -c -o $@ $<
-
-%.o : %.cpp $(DEPS)
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 wmbus-repeater: main.o amber.o network.o wmbus.o wmbus_dvl.o timedbuff.o
 	$(CC) -o $@ $^ $(LFLAGS)

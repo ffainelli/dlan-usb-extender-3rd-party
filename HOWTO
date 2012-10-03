@@ -264,19 +264,53 @@ hpav_cfg -n <network passphrase> -a 00:11:22:33:44:55 <network interface>
 4) Using wmbus-repeater with the dLAN USB Extender
 --------------------------------------------------
 
-wmbus-repeater is a software package which is connected to an Amber Wireless
-USB stick and on the other side, to the HomePlug AV network.
+wmbus-repeater is a software package allowing Open Metering System repeater
+functionnality between two host devices using a network interface on one side
+and an Amber Wireless USB stick (AMB8465 devices) on the other side.
 
-Its purpose is to repeat wireless data received on the USB stick back to the
-network, or the opposite depending on the network topology and goals.
+OMS wireless data received on the USB stick can be forwarded back to the
+network interface and vice versa, OMS data received over the network interface
+can be sent to the USB stick and then over the OMS wireless network.
 
-The typical setup is described below:
+4.1) Typical OMS network topology and functionnality
+----------------------------------------------------
 
-METER (eva board)   R1                     R2                    MUC (PC)
-------------------------------------------------------------------------
-T1meter     ->      T2other     ->         T1meter      ->       T2other
+To repeat OMS data, the setup must be comprised of two USB sticks and two dLAN
+USB Extender devices at least. The dLAN USB Extender devices must have been
+preliminary paired to be connected to each other in the same HomePlug AV
+network (see documentation above to pair the dLAN USB Extender devices).
 
-4.1) Configuring wmbus-repeater
+The typical setup will look like this:
+
+---------------     -----------------      -----------------    --------------
+| USB stick 1 | <-> | dLAN USB Ext 1| <==> | dLAN USB Ext 2| <->| USB Stick 2 |
+---------------     -----------------      -----------------    --------------
+  T1 meter mode         Same HomePlug AV network                T2 other mode
+
+See section 4.2 below to see how to configure wmbus-repeater in T1 meter and
+T2 other mode.
+
+OMS wireless data sent to USB Stick 1, configured as T1 meter mode, will be
+sent over the HomePlug AV network interface of dLAN USB Ext 1 and be received
+over the HomePlug AV network interface by dLAN USB Ext 2. dLAN USB Ext 2 will
+then forward this OMS wireless data to the USB STick 2 attached to it and set
+the "hop" counter to 1 (data is repeated).
+
+By combining several times this basic network topology you can very easily
+create repeated wmBus networks using the HomePlug AV network as a backbone for
+repeating wireless data.
+
+The wmbus-repeater software is handling the repeated packet in such a way
+that:
+- only packets with a hop counter set to 0 will be repeated
+- packets with a hop counter different from 0 will not be repeated
+
+This is to ensure that devices too close to each other, typically a T2 other
+device close enough to receive data from two T1 meter emitters will not repeat
+twice the same data received both over the HomePlug AV interface and over the
+USB stick.
+
+4.2) Configuring wmbus-repeater
 -------------------------------
 
 The configuration of the wmbus-repeater software is done in
@@ -299,7 +333,7 @@ Depending on your setup and Wireless and HomePlug AV network topology, you will
 have to configure the wmbus-repeater daemon to be in one of the mode presented
 above.
 
-4.2) Starting/stopping and USB stick hot-plugging
+4.3) Starting/stopping and USB stick hot-plugging
 -------------------------------------------------
 
 By default, when a USB stick is hotplugged on a dLAN USB Extender device the

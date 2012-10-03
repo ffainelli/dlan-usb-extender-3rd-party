@@ -1,7 +1,7 @@
 This repository contains 3d party proprietary software under the form of
 OpenWrt packages makefiles for the Devolo dLAN USB Extender device.
 
-This software contains:
+This repository contains:
 
 * foot: the Qualcomm Atheros/Intellon 6300 device flashless boot utility
         required for booting the Power Line Communication chip
@@ -14,6 +14,8 @@ This software contains:
 * devolo2openWRT_update.zip: transitional firmware required to allow the
   dLAN USB Extender to be flashed with OpenWrt. See readme.txt inside the
   ZIP file for more information
+
+* wmbus-repeater: OMS repeater software
 
 See the HOWTO file for more informations about how to build, flash and
 configure OpenWrt for the Devolo dLAN USB Extender.

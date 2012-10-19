@@ -25,7 +25,8 @@ typedef enum
 	mode_T1meter = 0x05,
 	mode_T1other = 0x06,
 	mode_T2meter = 0x07,
-	mode_T2other = 0x08
+	mode_T2other = 0x08,
+	mode_retain = 0xff
 } tWMBUS_MODE;
 
 int amber_open(const char *devname, const char *mode);

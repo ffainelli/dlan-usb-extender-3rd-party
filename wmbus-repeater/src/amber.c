@@ -54,6 +54,7 @@ tWMBUS_MODE mapStringToWMbusMode(const char *mode)
 	if(!strcasecmp(mode, "T1other")) return mode_T1other;
 	if(!strcasecmp(mode, "T2meter")) return mode_T2meter;
 	if(!strcasecmp(mode, "T2other")) return mode_T2other;
+	if(!strcasecmp(mode, "retain")) return mode_retain;
 
 	return mode_unknown;
 }
@@ -112,7 +113,10 @@ int amber_open(const char *devname, const char *szWMbusMode)
 	obuf[3] = 0x46; // cfg register
 	obuf[4] = 0x01; // len
 	obuf[5] = wmbus_mode; // mode
-	amber_write_command(obuf, 6);
+	if (wmbus_mode != mode_retain)
+		amber_write_command(obuf, 6);
+	else
+		printf("Not changing adapter mode\n");
 	sleep(1);
 	tcflush(cfg_fd, TCIFLUSH); // kill cmd reply
 

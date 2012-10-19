@@ -117,7 +117,7 @@ static time_t send_timed_buffers(void)
 static int usage(const char *name)
 {
 	printf("Usage: %s -d <device path> <wM-Bus mode>\n", name);
-	printf("           wM-Bus mode can be: S1, S2, T1meter, T1other, T2meter, T2other\n");
+	printf("           wM-Bus mode can be: S1, S2, T1meter, T1other, T2meter, T2other, retain\n");
 	return -1;
 }
 

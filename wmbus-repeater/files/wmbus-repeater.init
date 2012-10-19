@@ -12,6 +12,8 @@ start_service() {
 	config_get device $section device
 	config_get iface $section interface
 
+	[ -z $mode ] && mode="retain"
+
 	$NAME -d $device -i $iface $mode &
 }
 

@@ -328,10 +328,12 @@ Mode can be:
 - T1other
 - T2meter
 - T2other
+- retain
 
 Depending on your setup and Wireless and HomePlug AV network topology, you will
 have to configure the wmbus-repeater daemon to be in one of the mode presented
-above.
+above. The "retain" mode is a special value which is to be used when you do not
+want to change the mode pre-configured in the USB stick.
 
 4.3) Starting/stopping and USB stick hot-plugging
 -------------------------------------------------

@@ -18,4 +18,5 @@ This repository contains:
 * wmbus-repeater: OMS repeater software
 
 See the HOWTO file for more informations about how to build, flash and
-configure OpenWrt for the Devolo dLAN USB Extender.
+configure OpenWrt for the Devolo dLAN USB Extender. A HTML documentation is
+available here: http://ffainelli.github.com/dlan-usb-extender-3rd-party/

@@ -1,6 +1,7 @@
-OpenWrt and Devolo dLAN USB Extender building, flashing and
-configuration instructions.
-==============================================================================
+OpenWrt and Devolo dLAN USB Extender building, flashing and configuration instructions.
+======================================================================================
+Florian Fainelli <florian@openwrt.org>
+Version 1.0, Nov. 2012
 
 This document describes the various steps involved in building
 flashing and configuring an OpenWrt firmware for the Devolo
@@ -8,10 +9,13 @@ dLAN USB Extender device. This device is using a Moschip MCS8140
 System-on-a-chip, which is only supported for the moment by the
 OpenWrt development version (called trunk later in this document).
 
+[[X1]]
+
 1) Building OpenWrt
+-------------------
 
 1.1) Prerequisites
-------------------
+~~~~~~~~~~~~~~~~~~
 
 In order to build OpenWrt, we recommend using a Linux-based machine with
 the usual GNU software development tools such as GCC, Make, ncurses etc..
@@ -21,11 +25,11 @@ it missing or ineadequate.
 
 To download the OpenWrt sources the subversion and git tools are required.
 
-Note: OpenWrt can also be built under FreeBSD or MacOSX, but their are not
+*Note:* OpenWrt can also be built under FreeBSD or MacOSX, but their are not
 officially supported as build platforms.
 
 1.2) Checking out OpenWrt sources
----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The OpenWrt sources are made available using subversion. Complete
 instructions can be found here: https://dev.openwrt.org/wiki/GetSource
@@ -37,19 +41,19 @@ OpenWrt does not require being built as root, and will actually prevent you
 from building it as root. Assuming you are in your home directory ($HOME),
 create a directory in which you will download OpenWrt sources:
 
-cd $HOME
-mkdir -p projects/openwrt
-cd projects/openwrt
+	$ cd $HOME
+	$ mkdir -p projects/openwrt
+	$ cd projects/openwrt
 
 We can now start downloading the OpenWrt sources in this current directory
 by doing the following:
 
-svn co svn://svn.openwrt.org/openwrt/trunk/
+	$ svn co svn://svn.openwrt.org/openwrt/trunk/
 
 The sources are now checked out, and are ready for building.
 
 1.3) Adding Third party software for PowerLine Communication
-------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Prior to building OpenWrt we need to download third-party software, which
 is responsible for making the Power Line Communication (PLC) part of the
@@ -64,53 +68,49 @@ parties can be added.
 Move to the previously downloaded OpenWrt sources at step 1.2) using the
 following:
 
-cd trunk/
+	$ cd trunk/
 
 At the root of this directory, edit the file feeds.conf.default, which is
 going to contain the download method, name and url of the feed. Alternatively
 you can use the following:
 
-echo "src-git dlan https://github.com/ffainelli/dlan-usb-extender-3rd-party.git"
->> feeds.conf.default
+	$ echo "src-git dlan https://github.com/ffainelli/dlan-usb-extender-3rd-party.git"
+	  >> feeds.conf.default
 
 The first column tells the feeds script how to download (using git), the second
 is a name to reference to this "feed" and the third one is the url where to find
 the package makefiles.
 
 Once this is done, we need to get a copy of this feed, in order to do so, use
-the
-following command:
+the following command:
 
-./scripts/feeds update dlan
+	$ ./scripts/feeds update dlan
 
 Now that we have got a copy of the feed, we can add the packages to the build
 system:
 
-./scripts/feeds install foot
+	$ ./scripts/feeds install foot
 
 Since foot depends on confmgr and hpav-firmware to run, these packages are
-listed
-as dependencies and the feeds script handles that for us.
+listed as dependencies and the feeds script handles that for us.
 
-foot also depends on another package called hpavcfg which is available in a
-different
-feed which is the default repository for OpenWrt packages. To install this
-package
-we need to proceed with the following:
+foot also depends on another package called `hpavcfg` which is available in a
+different feed which is the default repository for OpenWrt packages. To install
+this package we need to proceed with the following:
 
-./scripts/feeds update packages
-./scripts/feeds install hpavcfg
+	$ ./scripts/feeds update packages
+	$ ./scripts/feeds install hpavcfg
 
 The build system will have integrated these packages just like regular packages.
 
 1.4) Building OpenWrt
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 Prior to building OpenWrt, we need to instruct the build system about which
 target we want to build for. In order to that, remain in the same directory
 ($HOME/projects/openwrt/trunk) and run the following:
 
-make menuconfig
+	$ make menuconfig
 
 You will be prompted with a console-based menu with which we will interact for
 configuring OpenWrt propertly.
@@ -130,7 +130,7 @@ Exit and save the configuration.
 
 We are now ready to build the entire firmware image, to do so, just run:
 
-make
+	$ make
 
 The build usually takes some time (up to one hour on a relatively recent
 build machine) due to the building of the toolchain, packages and kernel.
@@ -146,31 +146,32 @@ USB Extender device, we can prepare an USB flash stick to flash our device
 with this OpenWrt firmware.
 
 2.1) Locating and preparing the OpenWrt firmware image
-------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Remain in the same directory ($HOME/projects/openwrt/trunk), once the build is
-finished you will find several files in the directory bin/mcs814x/ relative to
-this directory which correspond to various files useful for flashing the target.
+finished you will find several files in the directory `bin/mcs814x/` relative
+to this directory which correspond to various files useful for flashing the
+target.
 
 OpenWrt produces an image which can be used by the dLAN USB Extender firmware
 with the USB autoupdate feature. This image is:
 
-bin/mcs814x/openwrt-mcs814x-dlan-usb-extender-upgrade-squashfs.bin
+`bin/mcs814x/openwrt-mcs814x-dlan-usb-extender-upgrade-squashfs.bin`
 
 You will need to prepare an USB Stick with specific parameters in order to use
 the USB autoupdate feature of the dLAN USB Extender. The specific parameters of
 this USB stick are:
 
 an unique FAT32 partition with the label autoupdate. You should then copy the
-file bin/mcs814x/openwrt-mcs814x-dlan-usb-extender-upgrade-squashfs.bin to this
-USB stick and name the file autoupdate_image. You can for instance use the
+file `bin/mcs814x/openwrt-mcs814x-dlan-usb-extender-upgrade-squashfs.bin` to
+this USB stick and name the file autoupdate_image. You can for instance use the
 following:
 
-cp bin/mcs814x/openwrt-mcs814x-dlan-usb-extender-upgrade-squashfs.bin
-/media/AUTOUPDATE/autoupdate_image
+	$ cp bin/mcs814x/openwrt-mcs814x-dlan-usb-extender-upgrade-squashfs.bin
+	     /media/AUTOUPDATE/autoupdate_image
 
 2.2) Flashing the dLAN USB Extender
------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Your device is now ready to be flashed with this OpenWrt firmware, in order to
 let the autoupdate feature start, just plug in the USB key, and power cycle
@@ -185,49 +186,55 @@ file from the USB stick.
 By default the device will come up on the Power Line Communication network with
 the following parameters:
 
+---------------------------------------
 Ethernet MAC address: 00:0B:3B:00:00:01
 IP address: 192.168.1.1
 Netmask: 255.255.255.0
 Homeplug AV NPW: HomePlugAV
 Telnet access with no password
+---------------------------------------
 
 3.1) Configuring IP networking
-------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For all OpenWrt devices IP networking is configured using the file
-/etc/config/network and contains the following:
+`/etc/config/network` and contains the following:
 
+--------------------------------------
 config interface lan
         option ifname   eth0
         option proto    static
         option ipaddr   192.168.1.1
         option netmask  255.255.255.0
+-------------------------------------
 
 The Ethernet MAC address of the interface can be changed at any time by using
 the configuration option "macaddr", this option should be added to the file
-/etc/config/network, like this:
+`/etc/config/network`, like this:
 
+-----------------------------------------
 	option macaddr	00:0B:3B:00:00:01
+-----------------------------------------
 
 If you want to configure your device to instead obtain its IP address
 via DHCP, just replace the "static" protocol by "dhcp". You should then issue
 the following command for the settings to be applied:
 
-/etc/init.d/network restart
+	$ /etc/init.d/network restart
 
 
 3.2) Configuring Power Line Communication networking
-----------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Power Line Communication networking is configured through several means among
 them:
 
-- using the file /etc/config/foot
-- using the push button located at the back of the device
-- using the hpavcfg utility
+* using the file /etc/config/foot
+* using the push button located at the back of the device
+* using the hpavcfg utility
 
 3.2.1) Using /etc/config/foot
------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The file /etc/config/foot is responsible for configuring the PLC chip with
 initial parameters on startup, the most important parameters is the DPW
@@ -235,10 +242,10 @@ initial parameters on startup, the most important parameters is the DPW
 changed, you will need to powercycle the device for the PLC chip to fetch its
 new parameters, this can be done using the following command:
 
-/etc/init.d/foot restart
+	$ /etc/init.d/foot restart
 
 3.2.2) Using the push button
------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To associate your device with an existing Homeplug AV network, you should press
 another device push button, then press the push button on the device you want
@@ -247,19 +254,19 @@ see the PLC LEDs start blinking to indicate trafic is properly emitted and
 received by devices.
 
 3.2.3) Using the hpavcfg utility
---------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The hpavcfg utility is a ligthweight configuration utility which is able to send
 a NPW to either a local or remote device. To change a device's NPW, you should
 issue the following command:
 
-hpav_cfg -n <network passphrase> <network interface>
+	$ hpav_cfg -n <network passphrase> <network interface>
 
 by default, hpav_cfg will use the HomePlugAV broadcast MAC address for sending
 this command. If you want to target a single device, use the "-a" switch of
 the utility, as show below:
 
-hpav_cfg -n <network passphrase> -a 00:11:22:33:44:55 <network interface>
+	$ hpav_cfg -n <network passphrase> -a 00:11:22:33:44:55 <network interface>
 
 4) Using wmbus-repeater with the dLAN USB Extender
 --------------------------------------------------
@@ -273,7 +280,7 @@ network interface and vice versa, OMS data received over the network interface
 can be sent to the USB stick and then over the OMS wireless network.
 
 4.1) Typical OMS network topology and functionnality
-----------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To repeat OMS data, the setup must be comprised of two USB sticks and two dLAN
 USB Extender devices at least. The dLAN USB Extender devices must have been
@@ -282,10 +289,12 @@ network (see documentation above to pair the dLAN USB Extender devices).
 
 The typical setup will look like this:
 
+-------------------------------------------------------------------------------
 ---------------     -----------------      -----------------    --------------
 | USB stick 1 | <-> | dLAN USB Ext 1| <==> | dLAN USB Ext 2| <->| USB Stick 2 |
 ---------------     -----------------      -----------------    --------------
   T1 meter mode         Same HomePlug AV network                T2 other mode
+-------------------------------------------------------------------------------
 
 See section 4.2 below to see how to configure wmbus-repeater in T1 meter and
 T2 other mode.
@@ -302,8 +311,9 @@ repeating wireless data.
 
 The wmbus-repeater software is handling the repeated packet in such a way
 that:
-- only packets with a hop counter set to 0 will be repeated
-- packets with a hop counter different from 0 will not be repeated
+
+* only packets with a hop counter set to 0 will be repeated
+* packets with a hop counter different from 0 will not be repeated
 
 This is to ensure that devices too close to each other, typically a T2 other
 device close enough to receive data from two T1 meter emitters will not repeat
@@ -311,24 +321,27 @@ twice the same data received both over the HomePlug AV interface and over the
 USB stick.
 
 4.2) Configuring wmbus-repeater
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The configuration of the wmbus-repeater software is done in
-/etc/config/wmbus-repeater. The default configuration is the following:
+`/etc/config/wmbus-repeater`. The default configuration is the following:
 
+-------------------------------------
 config wmbus-repeater
 	option device "/dev/ttyUSB0"
 	option interface "eth0"
 	option mode "S1
+-------------------------------------
 
 Mode can be:
-- S1
-- S2
-- T1meter
-- T1other
-- T2meter
-- T2other
-- retain
+
+* S1
+* S2
+* T1meter
+* T1other
+* T2meter
+* T2other
+* retain
 
 Depending on your setup and Wireless and HomePlug AV network topology, you will
 have to configure the wmbus-repeater daemon to be in one of the mode presented
@@ -336,13 +349,13 @@ above. The "retain" mode is a special value which is to be used when you do not
 want to change the mode pre-configured in the USB stick.
 
 4.3) Starting/stopping and USB stick hot-plugging
--------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 By default, when a USB stick is hotplugged on a dLAN USB Extender device the
-wmbus-repeater software will be started on the corresponding /dev/ttyUSB<N>
+wmbus-repeater software will be started on the corresponding `/dev/ttyUSB<N>`
 device with the mode specified in the configuration file
-/etc/config/wmbus-repeater. You can still control the execution life of
+`/etc/config/wmbus-repeater`. You can still control the execution life of
 wmbus-repeater by issuing the following commands:
 
-/etc/init.d/wmbus-repeater stop
-/etc/init.d/wmbus-repeater start
+	$ /etc/init.d/wmbus-repeater stop
+	$ /etc/init.d/wmbus-repeater start

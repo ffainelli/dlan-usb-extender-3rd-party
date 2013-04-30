@@ -103,6 +103,12 @@ this package we need to proceed with the following:
 
 The build system will have integrated these packages just like regular packages.
 
+The OMS repeater software is also packaged in the dlan feeds repository and
+should be installed using the following:
+
+	$ ./scripts/feeds install wmbus-repeater
+
+
 1.4) Building OpenWrt
 ~~~~~~~~~~~~~~~~~~~~~
 

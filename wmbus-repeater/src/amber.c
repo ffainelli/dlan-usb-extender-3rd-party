@@ -14,6 +14,7 @@
  */
 
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <termios.h>
 #include <sys/ioctl.h>
@@ -23,6 +24,7 @@
 #include <unistd.h>
 
 #include "amber.h"
+#include "int2bcd.h"
 
 void hex_dump(unsigned char *buf, int len);
 
@@ -32,6 +34,7 @@ void hex_dump(unsigned char *buf, int len);
 
 static int cfg_fd = -1;
 static struct termios cfg_oldtio;
+unsigned char bcdSerialNo[4];
 
 /*
  * Private utility functions
@@ -46,7 +49,7 @@ static unsigned char calc_xor_checksum(unsigned char *buf, int len)
 	return res;
 }
 
-tWMBUS_MODE mapStringToWMbusMode(const char *mode)
+static tWMBUS_MODE mapStringToWMbusMode(const char *mode)
 {
 	if(!strcasecmp(mode, "S1")) return mode_S1;
 	if(!strcasecmp(mode, "S2")) return mode_S2;
@@ -57,6 +60,18 @@ tWMBUS_MODE mapStringToWMbusMode(const char *mode)
 	if(!strcasecmp(mode, "retain")) return mode_retain;
 
 	return mode_unknown;
+}
+
+static void storeBcdSerialNo(unsigned char *buf)
+{
+	uint64_t tmp, serno;
+
+	serno = (buf[0]<<24) | (buf[1]<<16) | (buf[2]<<8) | (buf[3]<<0);
+
+	tmp = serno & 0x00FFFFF;
+	int2bcd(6, (uint64_t*)&tmp, (uint8_t*)&bcdSerialNo[0]); 
+	tmp = ((serno & 0xFF000000) >> 24);
+	int2bcd(2, (uint64_t*)&tmp, (uint8_t*)&bcdSerialNo[3]);
 }
 
 /*
@@ -106,20 +121,31 @@ int amber_open(const char *devname, const char *szWMbusMode)
 	tcsetattr(cfg_fd, TCSANOW, &newtio);
 
 	// set Wireless M-Bus mode
-	unsigned char obuf[16];
-	obuf[0] = 0xff;
-	obuf[1] = 0x09;
-	obuf[2] = 0x03; // len
-	obuf[3] = 0x46; // cfg register
-	obuf[4] = 0x01; // len
-	obuf[5] = wmbus_mode; // mode
+	unsigned char buf[16];
+	buf[0] = 0xff;
+	buf[1] = 0x09;
+	buf[2] = 0x03; // len
+	buf[3] = 0x46; // cfg register
+	buf[4] = 0x01; // len
+	buf[5] = wmbus_mode; // mode
 	if (wmbus_mode != mode_retain)
-		amber_write_command(obuf, 6);
+		amber_write_command(buf, 6);
 	else
 		printf("Not changing adapter mode\n");
 	sleep(1);
 	tcflush(cfg_fd, TCIFLUSH); // kill cmd reply
 
+	// get serial number
+	buf[0] = 0xff;
+	buf[1] = 0x0B;
+	buf[2] = 0x00;
+	buf[3] = 0xF4;
+	amber_write_command(buf, 4);
+	sleep(1);
+	amber_read(buf, sizeof(buf));
+	storeBcdSerialNo(buf+3);
+
+	tcflush(cfg_fd, TCIFLUSH);
 	return 0;
 }
 

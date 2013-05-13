@@ -11,7 +11,7 @@ all: wmbus-repeater
 %.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) -Wall -c -o $@ $<
 
-wmbus-repeater: main.o amber.o network.o wmbus.o wmbus_dvl.o timedbuff.o
+wmbus-repeater: main.o amber.o network.o wmbus.o wmbus_dvl.o timedbuff.o int2bcd.o
 	$(CC) -o $@ $^ $(LFLAGS)
 
 clean:

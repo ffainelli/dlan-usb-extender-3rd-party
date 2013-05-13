@@ -18,8 +18,8 @@
 #include <time.h>
 
 int timedbuff_init(void);
-unsigned int timedbuff_store(unsigned char *buf, unsigned int bufsize, time_t time_delta);
-unsigned int timedbuff_retrieve(unsigned char *data, unsigned int max_datasize);
+unsigned int timedbuff_store(unsigned char *buf, unsigned int bufsize, time_t time_delta, unsigned long ctx);
+unsigned int timedbuff_retrieve(unsigned char *data, unsigned int max_datasizei, unsigned long *ctx);
 int timedbuff_update_time(time_t time_elapsed);
 time_t timedbuff_get_delay(void);
 

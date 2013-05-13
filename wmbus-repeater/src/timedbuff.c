@@ -26,8 +26,9 @@ typedef struct _timed_buffer
 {
 	time_t time_delta;
 	char used;
-	unsigned char data[BUF_SIZE];
+	unsigned long ctx;
 	unsigned int data_size;
+	unsigned char data[BUF_SIZE];
 } TIMEDBUF;
 
 static TIMEDBUF timed_buffer[NUM_OF_BUFS];
@@ -38,6 +39,7 @@ static int reset_timedbuf(int idx)
 {
 	timed_buffer[idx].used = 0;
 	timed_buffer[idx].time_delta = 0;
+	timed_buffer[idx].ctx = 0;
 	timed_buffer[idx].data_size = 0;
 
 	// not really needed:
@@ -65,7 +67,7 @@ int timedbuff_init(void)
 	return 0;
 }
 
-unsigned int timedbuff_store(unsigned char *buf, unsigned int bufsize, time_t time_delta)
+unsigned int timedbuff_store(unsigned char *buf, unsigned int bufsize, time_t time_delta, unsigned long ctx)
 {
 	if(BUF_SIZE < bufsize) return 0;
 
@@ -74,12 +76,13 @@ unsigned int timedbuff_store(unsigned char *buf, unsigned int bufsize, time_t ti
 
 	timed_buffer[slot].used = 1;
 	timed_buffer[slot].time_delta = time_delta;
+	timed_buffer[slot].ctx = ctx;
 	timed_buffer[slot].data_size = bufsize;
 	memcpy(timed_buffer[slot].data, buf, bufsize);
 	return bufsize;
 }
 
-unsigned int timedbuff_retrieve(unsigned char *data, unsigned int max_datasize)
+unsigned int timedbuff_retrieve(unsigned char *data, unsigned int max_datasize, unsigned long *ctx)
 {
 	int i;
 	for(i=0 ; i<NUM_OF_BUFS ; i++)
@@ -88,6 +91,7 @@ unsigned int timedbuff_retrieve(unsigned char *data, unsigned int max_datasize)
 		if( (0==timed_buffer[i].time_delta) && (1==timed_buffer[i].used) && (max_datasize>=datasize) )
 		{
 			memcpy(data, timed_buffer[i].data, datasize);
+			*ctx = timed_buffer[i].ctx;
 			reset_timedbuf(i);
 			return datasize;
 		}

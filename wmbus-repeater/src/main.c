@@ -34,7 +34,9 @@
 #define max(a,b) (((a)>(b))?(a):(b))
 #endif
 
-static int repeat_directly = 0;
+#define USE_AMBER 1
+#define USE_NETW  2
+
 static time_t time_delay = 0;
 static unsigned char access_nr = 0;
 
@@ -101,13 +103,17 @@ static time_t send_timed_buffers(void)
 		/* we have buffers to send */
 		unsigned char data[2048];
 		unsigned int datalen;
-		while( 0 != (datalen = timedbuff_retrieve(data, sizeof(data))) )
+		unsigned long ctx;
+		while( 0 != (datalen = timedbuff_retrieve(data, sizeof(data), &ctx)) )
 		{
-			printf("(%s) sending delayed data to wM-Bus (%d bytes):\n", get_timestamp(), datalen);
+			printf("(%s) sending delayed data to %s (%d bytes):\n", get_timestamp(), (USE_AMBER==ctx)?"wM-Bus":"eth", datalen);
 			wmbus_hex_dump(data, datalen);
 			wmbus_dump(data, datalen);
 			printf("\n");
-			amber_write(data, datalen);
+			if(USE_AMBER==ctx)
+				amber_write(data, datalen);
+			else
+				netw_send(data, datalen);
 		}
 	}
 
@@ -242,10 +248,15 @@ int main(int argc, char **argv)
 				printf("\n");
 				if(should_repeat)
 				{
+					time_t buff_delay;
 					unsigned short sw = wmbus_apl_get_signature_word(module_data);
 					wmbus_set_hopcount(&sw);
 					wmbus_apl_set_signature_word(module_data, sw);
-					netw_send(module_data, offs);
+
+					buff_delay = (get_random_number()%20)+5; // OMS spec tells us to delay for 5..25 seconds
+					timedbuff_store(module_data, offs, buff_delay, USE_NETW);
+					time_delay = timedbuff_get_delay();
+					printf("     delaying for %ld seconds\n", buff_delay);
 
 					// now we need to check for SND-IR (C=0x46, hopcount=0) and reply with SND-NKE.
 					// the telegram's hopcount was 0 initially, otherwise we would not be in the should_repeat branch.
@@ -258,24 +269,31 @@ int main(int argc, char **argv)
 						
 						// fill in details:
 						// set meter id, meter manu, meter vers, meter devtype
-						wmbus_apl_set_meter_id(sndnke, wmbus_dll_get_id(module_data));
-						wmbus_apl_set_meter_manu(sndnke, wmbus_dll_get_manu(module_data));
-						wmbus_apl_set_meter_version(sndnke, wmbus_dll_get_version(module_data));
-						wmbus_apl_set_meter_devtype(sndnke, wmbus_dll_get_devtype(module_data));
+						if(wmbus_apl_has_long_header(module_data))
+						{
+							wmbus_apl_set_meter_id(sndnke, wmbus_apl_get_meter_id(module_data));
+							wmbus_apl_set_meter_manu(sndnke, wmbus_apl_get_meter_manu(module_data));
+							wmbus_apl_set_meter_version(sndnke, wmbus_apl_get_meter_version(module_data));
+							wmbus_apl_set_meter_devtype(sndnke, wmbus_apl_get_meter_devtype(module_data));
+						}
+						else
+						{
+							wmbus_apl_set_meter_id(sndnke, wmbus_dll_get_id(module_data));
+							wmbus_apl_set_meter_manu(sndnke, wmbus_dll_get_manu(module_data));
+							wmbus_apl_set_meter_version(sndnke, wmbus_dll_get_version(module_data));
+							wmbus_apl_set_meter_devtype(sndnke, wmbus_dll_get_devtype(module_data));
+						}
 
 						// access nr, status, sigword
 						wmbus_apl_set_access_nr(sndnke, access_nr++);
 						wmbus_apl_set_status(sndnke, 0x00);
 						wmbus_apl_set_signature_word(sndnke, 0x0000);
 
-						// send to netw (mark specific delay???)
-						netw_send(sndnke, sndnke_len);
-					
-						// send to wmbus with delay [2..5]
-						time_t buff_delay = (get_random_number()%3)+2; // OMS spec tells us to delay SND-NKE for 2..5 seconds
-						timedbuff_store(sndnke, sndnke_len, buff_delay);
+						// send to wmbus with delay [2..5] after sending SNR-IR
+						time_t nke_buff_delay = (get_random_number()%3)+2;
+						timedbuff_store(sndnke, sndnke_len, nke_buff_delay+buff_delay, USE_AMBER);
 						time_delay = timedbuff_get_delay();
-						printf("(%s) send SND-NKE to wM-Bus, delaying for %ld secs (%d bytes):\n", get_timestamp(), buff_delay, sndnke_len);
+						printf("(%s) send SND-NKE to wM-Bus, delaying for %ld + %ld secs (%d bytes):\n", get_timestamp(), buff_delay, nke_buff_delay, sndnke_len);
 						wmbus_hex_dump(sndnke, sndnke_len);
 						wmbus_dump(sndnke, sndnke_len);
 						printf("\n");
@@ -295,28 +313,12 @@ int main(int argc, char **argv)
 			}
 			else if(0<r)
 			{
-				if(repeat_directly)
-				{
-					printf("(%s) eth to wM-Bus (%d bytes):\n", get_timestamp(), r);
-					wmbus_hex_dump(buf, r);
-					wmbus_dump(buf, r);
-					printf("\n");
-					amber_write(buf, r);
-				}
-				else
-				{
-					time_t buff_delay;
-					if((23 == r) && (0x40 == wmbus_dll_get_c(buf))) // special case: (our own) SND-NKE
-						buff_delay = (get_random_number()%3)+2; // OMS spec tells us to delay for 2..5 seconds
-					else
-						buff_delay = (get_random_number()%20)+5; // OMS spec tells us to delay for 5..25 seconds
-					timedbuff_store(buf, r, buff_delay);
-					time_delay = timedbuff_get_delay();
-					printf("(%s) rcvd from eth, delaying for %ld secs (%d bytes):\n", get_timestamp(), buff_delay, r);
-					wmbus_hex_dump(buf, r);
-					wmbus_dump(buf, r);
-					printf("\n");
-				}
+				printf("(%s) eth to wM-Bus (%d bytes):\n", get_timestamp(), r);
+				wmbus_hex_dump(buf, r);
+				wmbus_dump(buf, r);
+				printf("\n");
+				amber_write(buf, r);
+
 			}
 		}
 	}

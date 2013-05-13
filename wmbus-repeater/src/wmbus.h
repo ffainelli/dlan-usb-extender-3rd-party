@@ -31,6 +31,7 @@ void wmbus_dll_set_devtype(unsigned char *buf, unsigned char type);
 unsigned char wmbus_apl_get_ci(unsigned char *buf);
 void wmbus_apl_set_ci(unsigned char *buf, unsigned char ci);
 unsigned char wmbus_apl_get_header_length(unsigned char *buf);
+int wmbus_apl_has_long_header(unsigned char *buf);
 unsigned char wmbus_apl_get_access_nr(unsigned char *buf);
 void wmbus_apl_set_access_nr(unsigned char *buf, unsigned char acc);
 unsigned char wmbus_apl_get_status(unsigned char *buf);
@@ -44,6 +45,7 @@ unsigned short wmbus_get_encblocks(unsigned short sigword);
 unsigned short wmbus_get_encmode(unsigned short sigword);
 unsigned short wmbus_get_access(unsigned short sigword);
 unsigned short wmbus_get_bidir(unsigned short sigword);
+
 unsigned long wmbus_apl_get_meter_id(unsigned char *buf);
 void wmbus_apl_set_meter_id(unsigned char *buf, unsigned long id);
 unsigned char *wmbus_apl_get_meter_manu(unsigned char *buf);

@@ -145,6 +145,13 @@ unsigned char wmbus_apl_get_header_length(unsigned char *buf)
 	return 0;
 }
 
+int wmbus_apl_has_long_header(unsigned char *buf)
+{
+	if(4 < wmbus_apl_get_header_length(buf))
+		return 1;
+	return 0;
+}
+
 /* Wireless M-Bus Application Layer (all headers = 4 and 12 byte headers) */
 
 unsigned char wmbus_apl_get_access_nr(unsigned char *buf)

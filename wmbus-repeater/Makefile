@@ -1,11 +1,11 @@
 #
-# Copyright (C) 2012 Florian Fainelli <florian@openwrt.org>
+# Copyright (C) 2012-2013 Florian Fainelli <florian@openwrt.org>
 #
 
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=wmbus-repeater
-PKG_RELEASE:=4
+PKG_RELEASE:=5
 
 include $(INCLUDE_DIR)/package.mk
 

@@ -16,6 +16,8 @@
 #include "wmbus.h"
 #include "wmbus_dvl.h"
 
+extern unsigned char bcdSerialNo[];
+
 // Block1: set manu, id, vers, devtype
 static void dvl_prepare_block1(unsigned char *buf, char cfield)
 {
@@ -24,7 +26,10 @@ static void dvl_prepare_block1(unsigned char *buf, char cfield)
 	// set manu
 	wmbus_dll_set_manu(buf, "DVL");
 	// set id
-	wmbus_dll_set_id(buf, 0xDD0001DD); // all dLAN/wM-Bus repeater devices in the AVLN are logically one repeater.
+	buf[4] = bcdSerialNo[0];
+	buf[5] = bcdSerialNo[1];
+	buf[6] = bcdSerialNo[2];
+	buf[7] = bcdSerialNo[3];
 	// set ver: v1
 	wmbus_dll_set_version(buf, '1');
 	// set device type: OMS repeater type 0x32
